@@ -4,7 +4,7 @@ export default {
   async checkDeleteProject(projectId) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:8083/api/projectDetail/checkDeleteProject?projectId=${projectId}`, {
+      const res = await axios.get(`http://112.137.129.158:8083/api/projectDetail/checkDeleteProject?projectId=${projectId}`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -22,7 +22,7 @@ export default {
     try {
       const { input_batch_id, project_id, block, replicate, column } = params;
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:8083/api/projectDetail/?input_batch_id=${input_batch_id}&project_id=${project_id}&block=${block}&replicate=${replicate}&column=${column}`, {
+      const res = await axios.get(`http://112.137.129.158:8083/api/projectDetail/?input_batch_id=${input_batch_id}&project_id=${project_id}&block=${block}&replicate=${replicate}&column=${column}`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -41,7 +41,7 @@ export default {
     try {
       const token = localStorage.getItem('token');
       const user = JSON.parse(localStorage.getItem('user')).email;
-      const res = await axios.put(`http://localhost:8083/api/projectDetail/?userId=${user}`, 
+      const res = await axios.put(`http://112.137.129.158:8083/api/projectDetail/?userId=${user}`, 
       updateData, 
       {
         headers: {
@@ -62,7 +62,7 @@ export default {
   async exportData(projectId) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:8083/api/projectDetail/export?projectId=${projectId}`, {
+      const res = await axios.get(`http://112.137.129.158:8083/api/projectDetail/export?projectId=${projectId}`, {
         headers: {
           'Authorization': `${token}`
         },

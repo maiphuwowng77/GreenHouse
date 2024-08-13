@@ -5,7 +5,7 @@ export default {
   async getByProjectId(projectId) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:8083/api/layoutArrangement/?project_id=${projectId}`, {
+      const res = await axios.get(`http://112.137.129.158:8083/api/layoutArrangement/?project_id=${projectId}`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -23,7 +23,7 @@ export default {
   async generateLayout(layoutParams) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`http://localhost:8083/api/layoutArrangement/generateLayout/`, 
+      const res = await axios.post(`http://112.137.129.158:8083/api/layoutArrangement/generateLayout/`, 
       {
         layoutParams
       },
@@ -46,7 +46,7 @@ export default {
   async createLayout(data) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`http://localhost:8083/api/layoutArrangement/saveLayout`, 
+      const res = await axios.post(`http://112.137.129.158:8083/api/layoutArrangement/saveLayout`, 
       {
         data
       },

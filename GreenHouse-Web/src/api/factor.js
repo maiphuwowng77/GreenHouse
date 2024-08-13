@@ -5,7 +5,7 @@ export default {
   async getByProjectId(projectId) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:8083/api/factor/?project_id=${projectId}`, {
+      const res = await axios.get(`http://112.137.129.158:8083/api/factor/?project_id=${projectId}`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -23,7 +23,7 @@ export default {
   async createFactor(data) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`http://localhost:8083/api/factor/`, 
+      const res = await axios.post(`http://112.137.129.158:8083/api/factor/`, 
       {
         data
       },
@@ -46,7 +46,7 @@ export default {
   async updateFactor(updateData) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.put(`http://localhost:8083/api/factor/`, 
+      const res = await axios.put(`http://112.137.129.158:8083/api/factor/`, 
       {
         updateData
       },

@@ -4,7 +4,7 @@ export default {
   async getPaging(page, limit) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:8083/api/project/paging?page=${page}&limit=${limit}`, {
+      const res = await axios.get(`http://112.137.129.158:8083/api/project/paging?page=${page}&limit=${limit}`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -26,7 +26,7 @@ export default {
   async deleteProject(projectId) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.delete(`http://localhost:8083/api/project/?id=${projectId}`, {
+      const res = await axios.delete(`http://112.137.129.158:8083/api/project/?id=${projectId}`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -44,7 +44,7 @@ export default {
   async getById(projectId) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:8083/api/project/getById?id=${projectId}`, {
+      const res = await axios.get(`http://112.137.129.158:8083/api/project/getById?id=${projectId}`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -62,7 +62,7 @@ export default {
   async generateCode(userId) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:8083/api/project/generateCode?userId=${userId}`, {
+      const res = await axios.get(`http://112.137.129.158:8083/api/project/generateCode?userId=${userId}`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -81,7 +81,7 @@ export default {
     try {
       const token = localStorage.getItem('token');
 
-      const res = await axios.post(`http://localhost:8083/api/project/`, 
+      const res = await axios.post(`http://112.137.129.158:8083/api/project/`, 
         projectData, 
         {
           headers: {
@@ -102,7 +102,7 @@ export default {
     try {
       const token = localStorage.getItem('token');
 
-      const res = await axios.put(`http://localhost:8083/api/project/`, 
+      const res = await axios.put(`http://112.137.129.158:8083/api/project/`, 
         projectData, 
         {
           headers: {

@@ -5,7 +5,7 @@ export default {
   async getByProjectId(projectId) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:8083/api/criterion/?project_id=${projectId}`, {
+      const res = await axios.get(`http://112.137.129.158:8083/api/criterion/?project_id=${projectId}`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -23,7 +23,7 @@ export default {
   async createCriterion(data) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`http://localhost:8083/api/criterion/`, 
+      const res = await axios.post(`http://112.137.129.158:8083/api/criterion/`, 
       {
         data
       },
@@ -46,7 +46,7 @@ export default {
   async updateCriterion(updateData) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.put(`http://localhost:8083/api/criterion/`, 
+      const res = await axios.put(`http://112.137.129.158:8083/api/criterion/`, 
       {
         updateData
       },

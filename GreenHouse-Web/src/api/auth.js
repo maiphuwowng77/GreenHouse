@@ -23,7 +23,7 @@ export default {
 
   async logIn(email, password) {
     try {
-      const res = await axios.post('http://localhost:8083/api/auth/login', {
+      const res = await axios.post('http://112.137.129.158:8083/api/auth/login', {
         email: email,
         password: password
       });
@@ -65,7 +65,7 @@ export default {
 
   async createAccount(formData) {
     try {
-      await axios.post('http://localhost:8083/api/auth/signup', {
+      await axios.post('http://112.137.129.158:8083/api/auth/signup', {
         _id: formData._id,
         email: formData.email,
         password: '12345678',
@@ -88,7 +88,7 @@ export default {
   async getAllUser() {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:8083/api/user/', {
+      const res = await axios.get('http://112.137.129.158:8083/api/user/', {
         headers: {
           'Authorization': `${token}`
         }
@@ -106,7 +106,7 @@ export default {
   async getPaging(page, limit) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:8083/api/auth/paging?page=${page}&limit=${limit}`, {
+      const res = await axios.get(`http://112.137.129.158:8083/api/auth/paging?page=${page}&limit=${limit}`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -129,7 +129,7 @@ export default {
     try {
       const token = localStorage.getItem('token');
 
-      const res = await axios.put(`http://localhost:8083/api/auth/`, 
+      const res = await axios.put(`http://112.137.129.158:8083/api/auth/`, 
       data, 
         {
           headers: {
@@ -149,7 +149,7 @@ export default {
   async deleteUser(userId) {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.delete(`http://localhost:8083/api/auth/?id=${userId}`, {
+      const res = await axios.delete(`http://112.137.129.158:8083/api/auth/?id=${userId}`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -168,7 +168,7 @@ export default {
       const token = localStorage.getItem('token');
       const userEmail = JSON.parse(localStorage.getItem('user')).email;
       console.log(userEmail);
-      const res = await axios.put('http://localhost:8083/api/auth/change-password', {
+      const res = await axios.put('http://112.137.129.158:8083/api/auth/change-password', {
         email: userEmail,
         currentPassword: currentPassword,
         newPassword: newPassword
