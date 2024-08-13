@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./GreenHouse-Web
+    ports:
+      - "8082:8080"  # Đổi cổng từ 8080 thành 8082
+    depends_on:
+      - backend
+      - statistics-api
+
+  backend:
+    build:
+      context: ./GreenHouse-Backend
+    ports:
+      - "8083:8081"  # Đổi cổng từ 8081 thành 8083
+    depends_on:
+      - mongodb
+
+  statistics-api:
+    build:
+      context: ./GreenHouse-Statistics
+    ports:
+      - "5001:5000"  # Đổi cổng từ 5000 thành 5001
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27018:27017"  # Đổi cổng từ 27017 thành 27018

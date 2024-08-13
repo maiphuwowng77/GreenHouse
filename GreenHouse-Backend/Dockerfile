@@ -1,0 +1,18 @@
+# Backend Dockerfile
+FROM node:18
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy rest of the application code
+COPY . .
+
+# Expose the port the app runs on
+EXPOSE 8081
+
+# Start the application
+CMD ["npm", "start"]

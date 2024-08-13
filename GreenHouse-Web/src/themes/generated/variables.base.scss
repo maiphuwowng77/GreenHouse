@@ -1,0 +1,65 @@
+$base-accent: #637A30;
+$base-text-color: #000000de;
+$base-bg: #ffffff;
+$base-border-color: #e0e0e0;
+$base-border-radius: 4px;
+
+.dx-field-item-label {
+  font-weight: bold;
+  padding: 16px 0px 8px 0px;
+}
+
+.dx-texteditor-container {
+  .dx-texteditor-input-container {
+    width: 100%;
+    border-radius: 4px;
+    border: unset;
+    background-color: #DDE1CD;
+  }
+  .dx-texteditor-input-container:focus  {
+    border-radius: 4px;
+    border: unset !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  .dx-texteditor.dx-editor-filled::after {
+    border-bottom: none !important;
+  }
+}
+
+.dx-texteditor-input-container::after .dx-invalid{
+  background-color: #df2a2a;
+}
+
+.dx-datagrid {
+  .dx-row.dx-header-row {
+    font-weight: bold;
+    background-color: #b9bdb9;
+
+    .dx-cell-focus-disabled {
+      background-color: #b9bdb9;
+    }
+  }
+
+  .dx-data-row:nth-child(odd) {
+    background-color: #f0f0f0;
+  }
+
+  .dx-data-row:nth-child(even) {
+    background-color: #e9ebe3;
+  }
+
+  .dx-cell {
+    border: 1px solid #000;
+  }
+  .dx-filter-row {
+    border: 1px solid #000;
+  }
+
+  .dx-datagrid-pager {
+    .dx-selection {
+      background-color: #4caf50;
+      color: white;
+    }
+  }
+}
