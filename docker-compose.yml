@@ -22,7 +22,7 @@ services:
     build:
       context: ./GreenHouse-Statistics
     ports:
-      - "5001:5000"  # Đổi cổng từ 5000 thành 5001
+      - "5002:5000"  # Đổi cổng từ 5000 thành 5001
 
   mongodb:
     image: mongo:latest
