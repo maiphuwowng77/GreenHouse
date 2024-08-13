@@ -49,7 +49,7 @@ async describeData(params) {
     if (response.status == 200) {
       const data = response.data;
       // Send the fetched data to the statistics API endpoint
-      const statisticsResponse = await axios.post(`http://127.0.0.1:5002/describe`, data);
+      const statisticsResponse = await axios.post(`http://127.0.0.1:5003/describe`, data);
       console.log(statisticsResponse.data.description);
       return {
         isOk: true,
@@ -93,7 +93,7 @@ async performAnova(params) {
     const data = response.data;
 
     // Send the fetched data to the statistics API endpoint
-    const statisticsResponse = await axios.post(`http://127.0.0.1:5002/anova`, data);
+    const statisticsResponse = await axios.post(`http://127.0.0.1:5003/anova`, data);
     console.log(statisticsResponse);
     
     // Return the result from the statistics API
@@ -128,7 +128,7 @@ async performTukeyTest(params) {
     const data = response.data;
 
     // Send the fetched data to the statistics API endpoint
-    const statisticsResponse = await axios.post(`http://127.0.0.1:5002/tukey`, data);
+    const statisticsResponse = await axios.post(`http://127.0.0.1:5003/tukey`, data);
 
     // Return the result from the statistics API
     return {
@@ -162,7 +162,7 @@ async performTTest(params) {
     const data = response.data;
 
     // Send the fetched data to the statistics API endpoint
-    const statisticsResponse = await axios.post(`http://127.0.0.1:5002/t_test`, data);
+    const statisticsResponse = await axios.post(`http://127.0.0.1:5003/t_test`, data);
 
     // Return the result from the statistics API
     return {
