@@ -22,6 +22,20 @@ async function getDataByCell(params) {
   return detailData;
 }
 
+async function getHistoryByCell(params) {
+  const { input_batch_id, project_id, block, replicate, column } = params;
+  let historyData = await historyModel.find({
+    project_id: project_id,
+    input_batch_id: input_batch_id,
+    block: block,
+    replicate: replicate,
+    column: column
+  });
+
+
+  return historyData;
+}
+
 async function getDataByInputBatch(params) {
   const { input_batch_id, project_id, criterion_id } = params;
   let detailData = await projectDetailModel.find({
@@ -112,7 +126,9 @@ async function update(user, data) {
           historyEntries.push({
             project_id: newData.project_id,
             criterion_id: newData.criterion_id,
+            criterion_code: newData.criterion_code,
             treatment_id: newData.treatment_id,
+            treatment_code: newData.treatment_code,
             input_batch_id: newData.input_batch_id,
             block: newData.block,
             replicate: newData.replicate,
@@ -241,6 +257,70 @@ async function exportData(projectId) {
   return workbook;
 }
 
+async function exportHistoryData(params) {
+  // Destructuring params
+  const { input_batch_id, project_id, block, replicate, column } = params;
+  var inputBatch = await inputBatchModel.find({ project_id: project_id});
+
+  // Lấy dữ liệu từ historyModel theo params
+  const historyData = await historyModel.find({
+    project_id: project_id,
+    input_batch_id: input_batch_id,
+    block: block,
+    replicate: replicate,
+    column: column
+  });
+
+  // Chuyển đổi giá trị trong cột `value` và `oldValue` thành số, kiểm tra NaN
+  const transformedData = historyData.map(item => {
+    const timestamp = new Date(item.timestamp).toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    const inputBatchItem = inputBatch.find(batch => batch._id.toString() == item.input_batch_id.toString());
+    return {
+      ...item,
+      plot: item.plot,
+      treatment_code: item.treatment_code,
+      block: item.block,
+      criterion_code: item.criterion_code,
+      input_batch: inputBatchItem 
+      ? `Batch ${inputBatchItem.order} (${new Date(inputBatchItem.start_date).toLocaleDateString('en-GB')} - ${new Date(inputBatchItem.end_date).toLocaleDateString('en-GB')})` 
+      : null,
+      value: isNaN(Number(item.value)) ? null : Number(item.value),
+      oldValue: isNaN(Number(item.oldValue)) ? null : Number(item.oldValue),
+      time: timestamp
+    };
+  });
+
+  // Tạo workbook và worksheet
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('History Data');
+
+  // Định nghĩa cột cho worksheet
+  worksheet.columns = [
+    { header: 'Plot', key: 'plot', width: 10 },
+    { header: 'Input Batch', key: 'input_batch', width: 30 },
+    { header: 'Block', key: 'block', width: 10 },
+    { header: 'Treatment', key: 'treatment_code', width: 10 },
+    { header: 'Criterion', key: 'criterion_code', width: 25 },
+    { header: 'Old value', key: 'oldValue', width: 15 },
+    { header: 'New value', key: 'value', width: 15 },
+    { header: 'Time', key: 'time', width: 25 }
+  ];
+
+  transformedData.forEach(item => {
+    worksheet.addRow(item);
+  });
+
+  // Trả về workbook
+  return workbook;
+}
+
 module.exports = {
   getDataByCell,
   create,
@@ -249,4 +329,6 @@ module.exports = {
   checkDeleteProject,
   exportData,
   getDataByInputBatch,
+  getHistoryByCell,
+  exportHistoryData
 };

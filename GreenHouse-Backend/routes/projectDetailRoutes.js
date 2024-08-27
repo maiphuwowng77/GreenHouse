@@ -5,10 +5,12 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 router.get('/', authMiddleware, projectDetailController.getDataByCell);
 router.get('/getInputBatch', authMiddleware, projectDetailController.getDataByInputBatch);
+router.get('/getHistory', authMiddleware, projectDetailController.getHistoryByCell);
 router.post('/', authMiddleware, projectDetailController.create);
 router.put('/', authMiddleware, projectDetailController.update);
 // router.delete('/', authMiddleware, projectDetailController.deleteById);
 router.get('/checkDeleteProject', authMiddleware, projectDetailController.checkDeleteProject);
 router.get('/export', authMiddleware, projectDetailController.exportData);
+router.get('/exportHistory', authMiddleware, projectDetailController.exportHistoryData);
 
 module.exports = router;

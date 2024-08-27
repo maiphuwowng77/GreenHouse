@@ -27,13 +27,18 @@
         </div>
       </div>
     </div> -->
-    <div class="flex-col">
-      <div class="input_text fl-3 mr-16">
+    <div class="flex-row">
+      <div class="input_text">
         <div class="range-date">
           Input batch {{ input_batch.order }} ({{ moment(input_batch.start_date).format('DD/MM/YYYY') }} - {{ moment(input_batch.end_date).format('DD/MM/YYYY') }})
         </div>
         <br>
       </div>
+      <dx-button
+        icon="export"
+        class="mr-16 btn-export"
+        @click="exportHistoryData"
+      />
     </div>
     <div class="input-detail flex-col">
       <div v-for="(projectDetail) in projectDetailList" :key="projectDetail._id" class="input-text">
@@ -129,6 +134,9 @@ const saveDataAndCloseForm = () => {
   projectMonitorStore.saveDataByCell(projectDetailList.value);
 };
 
+const exportHistoryData = async () => {
+  await projectMonitorStore.exportHistoryData();
+};
 
 </script>
 
@@ -147,7 +155,8 @@ const saveDataAndCloseForm = () => {
 }
 .input_text {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-grow: 1;
   label {
     font-weight: 500;
     font-size: 16px;
@@ -225,5 +234,14 @@ const saveDataAndCloseForm = () => {
     }
     padding-bottom: 16px;
   }
+}
+
+.btn-export {
+  margin-left: auto;
+}
+
+.flex-row {
+  display: flex;
+  //align-items: center; /* Căn chỉnh các phần tử theo chiều dọc (trung tâm) */
 }
 </style>

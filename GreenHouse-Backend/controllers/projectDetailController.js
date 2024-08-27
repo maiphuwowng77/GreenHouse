@@ -11,6 +11,16 @@ async function getDataByCell(req, res) {
   }
 }
 
+async function getHistoryByCell(req, res) {
+  try {
+    const item = await projectDetailService.getHistoryByCell(req.query);
+    res.status(200).json(item);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+}
+
 async function getDataByInputBatch(req, res) {
   try {
     const item = await projectDetailService.getDataByInputBatch(req.query);
@@ -79,6 +89,28 @@ async function exportData(req, res) {
   }
 }
 
+
+async function exportHistoryData(req, res) {
+  try {
+    let workbook = await projectDetailService.exportHistoryData(req.query);
+    
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=Export_History.xlsx'
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+}
+
 module.exports = {
   getDataByCell,
   create,
@@ -86,5 +118,7 @@ module.exports = {
   deleteById,
   checkDeleteProject,
   exportData,
-  getDataByInputBatch
+  getDataByInputBatch,
+  getHistoryByCell,
+  exportHistoryData
 };
