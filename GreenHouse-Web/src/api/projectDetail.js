@@ -87,7 +87,7 @@ export default {
     try {
       const { input_batch_id, project_id, block, replicate, column } = params;
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:8081/api/projectDetail/exportHistory?input_batch_id=${input_batch_id}&project_id=${project_id}&block=${block}&replicate=${replicate}&column=${column}`, {
+      const res = await axios.get(`http://112.137.129.158:8083/api/projectDetail/exportHistory?input_batch_id=${input_batch_id}&project_id=${project_id}&block=${block}&replicate=${replicate}&column=${column}`, {
         headers: {
           'Authorization': `${token}`
         },
