@@ -10,6 +10,7 @@ const layoutArrangementModel = require('../models/layoutArrangement');
 const projectDetailModel = require('../models/projectDetail');
 const levelModel = require('../models/level');
 const inputBatchModel = require('../models/inputBatch');
+const historyModel = require('../models/history');
 
 async function getPaging(params) {
   const page = parseInt(params.page) || 1;
@@ -136,6 +137,9 @@ async function deleteProject(id) {
 
     // projectDetail
     await projectDetailModel.deleteMany({project_id: id}, {session: session});
+
+    // history
+    await historyModel.deleteMany({project_id: id}, {session: session});
 
     await session.commitTransaction();
     session.endSession();

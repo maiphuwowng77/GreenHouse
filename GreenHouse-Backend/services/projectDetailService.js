@@ -5,6 +5,7 @@ const { TypeExperiment, ModelState } = require('../enums/enums');
 const criterionModel = require('../models/criterion');
 const treatmentModel = require('../models/treatment');
 const inputBatchModel = require('../models/inputBatch');
+const layoutArrangementModel = require('../models/layoutArrangement');
 const express = require('express');
 const ExcelJS = require('exceljs');
 
@@ -81,7 +82,9 @@ async function update(user, data) {
       const historyEntriesInsert = dataInsert.map(newData => ({
         project_id: newData.project_id,
         criterion_id: newData.criterion_id,
+        criterion_code: newData.criterion_code,
         treatment_id: newData.treatment_id,
+        treatment_code: newData.treatment_code,
         input_batch_id: newData.input_batch_id,
         block: newData.block,
         replicate: newData.replicate,
@@ -257,6 +260,241 @@ async function exportData(projectId) {
   return workbook;
 }
 
+async function exportSchema(projectId, inputBatchId) {
+  const layoutArrangement = await layoutArrangementModel.findOne({ project_id: projectId });
+  const criterion = await criterionModel.find({ project_id: projectId });
+  var inputBatch = await inputBatchModel.find({ project_id: projectId});
+  const inputBatchItem = inputBatch.find(batch => batch._id.toString() == inputBatchId.toString());
+
+  if (!layoutArrangement || !inputBatch) {
+    throw new Error('Layout arrangement or input batch not found');
+  }
+
+  const { layout, treatments } = layoutArrangement;
+  const treatmentOrderMap = treatments.reduce((acc, treatment, index) => {
+    acc[treatment] = index;
+    return acc;
+  }, {});
+  // Xây dựng dữ liệu cho worksheet
+  const result = [];
+
+  // Duyệt qua layout để tạo dữ liệu
+  const generateData = (layout) => {
+    layout.forEach((block, blockIndex) => {
+      block.forEach((replicate, replicateIndex) => {
+        replicate.forEach((column, columnIndex) => {
+          if (column) {
+            result.push({
+              plot: `${blockIndex + 1}.${replicateIndex + 1}.${columnIndex + 1}`,
+              input_batch: inputBatchItem 
+              ? `Batch ${inputBatchItem.order} (${new Date(inputBatchItem.start_date).toLocaleDateString('en-GB')} - ${new Date(inputBatchItem.end_date).toLocaleDateString('en-GB')})` 
+              : null,
+              block: blockIndex + 1,
+              replicate: replicateIndex + 1,
+              treatment_code: column,
+              ...criterion.reduce((acc, crit) => ({ ...acc, [crit.criterion_code]: '' }), {})
+            });
+          }
+        });
+      });
+    });
+  };
+
+  generateData(layout);
+
+  // Tạo workbook và worksheet
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Schema');
+
+  // Cấu hình các cột cho worksheet
+  const columnCriterion = criterion.map(x => ({
+    header: x.criterion_name,
+    key: x.criterion_code,
+    width: 20
+  }));
+
+  result.sort((a, b) => {
+    // Sắp xếp theo block
+    if (a.block < b.block) {
+      return -1;
+    }
+    if (a.block > b.block) {
+      return 1;
+    }
+
+    // Nếu block bằng nhau, sắp xếp theo treatment_code dựa trên thứ tự trong mảng treatments
+    return treatmentOrderMap[a.treatment_code] - treatmentOrderMap[b.treatment_code];
+  });
+
+  worksheet.columns = [
+    { header: 'Plot', key: 'plot', width: 15 },
+    { header: 'Input Batch', key: 'input_batch', width: 30 },
+    { header: 'Block', key: 'block', width: 10 },
+    { header: 'Treatment', key: 'treatment_code', width: 20 },
+    ...columnCriterion
+  ];
+
+  // Thêm các hàng vào worksheet
+  result.forEach(item => {
+    worksheet.addRow(item);
+  });
+
+  return workbook;
+}
+
+async function importData(userId, input_batch_id, project_id, formData) {
+  console.log(input_batch_id);
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // Đọc dữ liệu từ file Excel
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(formData.buffer);
+    const worksheet = workbook.getWorksheet(1);
+    const criterion_list = [];
+
+    // Xử lý dữ liệu từ file Excel
+    const data = [];
+    const rows = worksheet.getRows(1, worksheet.rowCount); // Lấy tất cả các hàng từ sheet
+
+    // Xử lý hàng tiêu đề để lấy các cột criterion
+    const headerRow = rows[0];
+    const numberOfColumns = headerRow.cellCount;
+    for (let i = 5; i <= numberOfColumns; i++) {
+      criterion_list.push(headerRow.getCell(i).value); // Lưu giá trị của cột criterion
+    }
+
+    // Xử lý các hàng dữ liệu
+    for (let rowIndex = 1; rowIndex < rows.length; rowIndex++) {
+      const row = rows[rowIndex];
+      const plot = row.getCell(1).value; // Cột Plot
+      const [block, replicate, columnValue] = plot.split('.').map(Number);
+      const treatment_code = row.getCell(4).value; // Cột Treatment Code
+      const treatment = await treatmentModel.findOne({ treatment_code: treatment_code, project_id: project_id }).session(session);
+
+      for (let i = 0; i < criterion_list.length; i++) {
+        const criterion_code = criterion_list[i];
+        const value = row.getCell(5 + i).value; // Cột Value
+        const criterion = await criterionModel.findOne({ criterion_code: criterion_code, project_id: project_id }).session(session);
+
+        if (!treatment || !criterion) {
+          throw new Error(`Treatment or Criterion not found: ${treatment_code}, ${criterion_code}`);
+        }
+
+        data.push({
+          project_id: project_id,
+          project_code: treatment.project_code,
+          criterion_id: criterion._id,
+          criterion_code: criterion_code,
+          treatment_id: treatment._id,
+          treatment_code: treatment_code,
+          input_batch_id: input_batch_id,
+          block: block,
+          replicate: replicate,
+          column: columnValue,
+          plot: plot,
+          value: value,
+        });
+      }
+    }
+
+    console.log(data);
+
+    // Xử lý các bản ghi để chèn hoặc cập nhật và tạo lịch sử
+    const bulkOperations = [];
+    const historyEntries = [];
+
+    for (const newData of data) {
+      const existingRecord = await projectDetailModel.findOne({
+        project_id: newData.project_id,
+        criterion_id: newData.criterion_id,
+        plot: newData.plot,
+        input_batch_id: input_batch_id,
+      }).session(session);
+
+      if (existingRecord) {
+        if (existingRecord.value !== newData.value) {
+          historyEntries.push({
+            project_id: newData.project_id,
+            criterion_id: newData.criterion_id,
+            criterion_code: newData.criterion_code,
+            treatment_id: newData.treatment_id,
+            treatment_code: newData.treatment_code,
+            input_batch_id: newData.input_batch_id,
+            block: newData.block,
+            replicate: newData.replicate,
+            column: newData.column,
+            plot: newData.plot,
+            oldValue: existingRecord.value,
+            value: newData.value,
+            updatedBy: userId,
+            timestamp: new Date()
+          });
+
+          bulkOperations.push({
+            updateOne: {
+              filter: {
+                project_id: newData.project_id,
+                criterion_id: newData.criterion_id,
+                plot: newData.plot,
+                input_batch_id: input_batch_id,
+              },
+              update: { $set: { value: newData.value } }
+            }
+          });
+        }
+      } else {
+        historyEntries.push({
+          project_id: newData.project_id,
+          criterion_id: newData.criterion_id,
+          criterion_code: newData.criterion_code,
+          treatment_id: newData.treatment_id,
+          treatment_code: newData.treatment_code,
+          input_batch_id: newData.input_batch_id,
+          block: newData.block,
+          replicate: newData.replicate,
+          column: newData.column,
+          plot: newData.plot,
+          oldValue: '',  // oldValue rỗng
+          value: newData.value,
+          updatedBy: userId,
+          timestamp: new Date()
+        });
+
+        bulkOperations.push({
+          insertOne: {
+            document: newData
+          }
+        });
+      }
+    }
+
+    // Thực hiện các thao tác cơ sở dữ liệu
+    if (bulkOperations.length > 0) {
+      await projectDetailModel.bulkWrite(bulkOperations, { session });
+      //console.log(bulkOperations);
+    }
+
+    if (historyEntries.length > 0) {
+      await historyModel.insertMany(historyEntries, { session });
+      //console.log(historyEntries);
+    }
+
+    // Cam kết transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    return { success: true };
+  } catch (error) {
+    // Hủy bỏ transaction nếu có lỗi
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
+}
+
+
 async function exportHistoryData(params) {
   // Destructuring params
   const { input_batch_id, project_id, block, replicate, column } = params;
@@ -328,7 +566,9 @@ module.exports = {
   deleteById,
   checkDeleteProject,
   exportData,
+  importData,
   getDataByInputBatch,
   getHistoryByCell,
-  exportHistoryData
+  exportHistoryData,
+  exportSchema
 };

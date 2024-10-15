@@ -68,6 +68,21 @@ async function checkDeleteProject(req, res) {
   }
 }
 
+async function importData(req, res) {
+  try {
+    //console.log(req.file); // In ra để kiểm tra file có được nhận đúng không
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    let data = await projectDetailService.importData(req.query.userId, req.query.input_batch_id, req.query.project_id, req.file.buffer); // Sử dụng req.file.buffer để xử lý file Excel
+    res.status(200).json(data);
+  } catch (error) {
+    console.log('Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
 async function exportData(req, res) {
   try {
     let workbook = await projectDetailService.exportData(req.query.projectId);
@@ -89,6 +104,47 @@ async function exportData(req, res) {
   }
 }
 
+async function exportSchema(req, res) {
+  try {
+    let workbook = await projectDetailService.exportSchema(req.query.projectId, req.query.inputBatchId);
+    
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=Export-Schema.xlsx'
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+}
+
+async function exportHistoryData(req, res) {
+  try {
+    let workbook = await projectDetailService.exportHistoryData(req.query);
+    
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=Export_History.xlsx'
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+}
 
 async function exportHistoryData(req, res) {
   try {
@@ -117,8 +173,9 @@ module.exports = {
   update,
   deleteById,
   checkDeleteProject,
-  exportData,
+  importData,
   getDataByInputBatch,
   getHistoryByCell,
-  exportHistoryData
+  exportHistoryData,
+  exportSchema
 };
