@@ -12,6 +12,18 @@
           stylingMode="outlined"
         /> -->
         <dx-button
+          icon="import"
+          class="mr-16 btn-import"
+          @click="triggerFileInput"
+        />
+        <!-- Thẻ input để chọn file, được ẩn -->
+        <input
+          type="file"
+          ref="fileInput"
+          style="display: none"
+          @change="handleFileChange"
+        />
+        <dx-button
           icon="export"
           class="mr-16 btn-export"
           @click="exportData"
@@ -33,6 +45,11 @@
               icon="edit"
               class="mr-16 btn-close"
               @click="onClickAddInputBatch"
+            />
+            <dx-button
+              icon="download"
+              class="mr-16 btn-export"
+              @click="exportSchema"
             />
           </div>
           <dx-select-box
@@ -104,6 +121,18 @@
           </div>
         </div>
         <div class="header2">
+          <h3>Dashboard</h3>
+        </div>
+        <div class="dashboard-iframe">
+          <iframe
+            src="http://localhost:3000/public/dashboard/c8f12382-b5e5-4f96-bc6d-70fedb398ec3"
+            frameborder="0"
+            width="100%"
+            height="600"
+            allowtransparency
+          ></iframe>
+        </div>
+        <div class="header2">
           <h3>Statistics</h3>
         </div>
         <div class="input_text fl-3 mr-16">
@@ -171,6 +200,7 @@ const inputBatchList = ref([]);
 const criterionList = ref([]);
 const showStatistics = ref(false);
 const selectedCriterion = ref(null);
+const fileInput = ref(null);
 
 onBeforeMount( async () => {
   projectMonitorStore.$reset();
@@ -216,8 +246,53 @@ const onCloseMonitor = () => {
   router.push('/projects');
 };
 
+// Hàm để kích hoạt chọn file
+const triggerFileInput = () => {
+  fileInput.value.click();
+};
+
+// Hàm xử lý khi người dùng chọn file
+const handleFileChange = async (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    try {
+      // Tạo FormData và thêm file vào
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Lặp qua và in ra các giá trị trong FormData
+      for (let pair of formData.entries()) {
+        console.log(`${pair[0]}: ${pair[1].name}`);  // In ra key và tên của tệp
+      }
+
+      // In ra thông tin của tệp
+      console.log('Tên file:', file.name);
+      console.log('Kích thước file:', file.size);
+      console.log('Loại file:', file.type);
+
+      projectMonitorStore.dataImport = formData;
+
+      // Gọi API để gửi FormData (phần này không thay đổi)
+      const result = await projectMonitorStore.importData();
+
+      if (result && result.success) {
+        alert("Import dữ liệu thành công!");
+      } else {
+        alert(result.error || "Có lỗi xảy ra khi import dữ liệu 2.");
+      }
+    } catch (error) {
+      console.error("Lỗi khi import dữ liệu:", error);
+      alert("Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại.");
+    }
+  }
+};
+
 const exportData = async () => {
   await projectMonitorStore.exportData();
+};
+
+const exportSchema = async () => {
+  await projectMonitorStore.exportSchema();
 };
 
 const onClickAddInputBatch = () => {
@@ -291,7 +366,7 @@ const openPopupMonitor = (e, layoutIndex) => {
     .header-right {
       position: absolute;
       right: 16px;
-      .btn-statistics, .btn-export, .btn-close {
+      .btn-statistics, .btn-import, .btn-export, .btn-close {
         background-color: white !important;
         color: black !important;
       }

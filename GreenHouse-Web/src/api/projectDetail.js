@@ -83,6 +83,55 @@ export default {
     }
   },
 
+  async exportSchema(projectId, inputBatchId) {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`http://112.137.129.158:8083/api/projectDetail/exportSchema?projectId=${projectId}&inputBatchId=${inputBatchId}`, {
+        headers: {
+          'Authorization': `${token}`
+        },
+        responseType: 'blob',
+      });
+      if (res.status == 200) {
+        const url = window.URL.createObjectURL(new Blob([res.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'ExportSchema.xlsx');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } 
+    catch {
+      return false;
+    }
+  },
+
+  async importData(input_batch_id, project_id, formData) {
+    try {
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user')).email;
+      const res = await axios.put(
+        `http://112.137.129.158:8083/api/projectDetail/import?userId=${user}&input_batch_id=${input_batch_id}&project_id=${project_id}`,
+        formData, // Gửi FormData thay vì trực tiếp buffer
+        {
+          headers: {
+            'Authorization': `${token}`,
+            'Content-Type': 'multipart/form-data', // Sử dụng multipart/form-data cho upload file
+          },
+        }
+      );
+      if (res.status == 200) {
+        return res.data;
+      }
+      return false;
+    } 
+    catch (error) {
+      console.error('Lỗi khi import dữ liệu:', error);
+      return false;
+    }
+  },
+
   async exportHistory(params) {
     try {
       const { input_batch_id, project_id, block, replicate, column } = params;
@@ -107,5 +156,4 @@ export default {
       return false;
     }
   },
-
 };

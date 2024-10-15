@@ -22,6 +22,7 @@ export const useProjectMonitorStore = defineStore({
     input_batch: null,
     layoutDetail: [],
     criterionList: [],
+    dataImport: new FormData(),
   }),
   actions: {
     async getProjectById(id) {
@@ -114,6 +115,36 @@ export const useProjectMonitorStore = defineStore({
 
     async exportData() {
       const res = await projectDetailApi.exportData(this.projectId);
+    },
+    
+    async exportSchema() {
+      const res = await projectDetailApi.exportSchema(this.projectId, this.input_batch._id);
+    },
+
+    async importData() {
+      if (!this.dataImport.has('file')) {
+        throw new Error('No file to import');
+      }
+
+      try {
+        const res = await projectDetailApi.importData(this.input_batch._id, this.project._id, this.dataImport);
+        this.dataImport.delete('file'); // Xóa file khỏi FormData sau khi import xong
+        return res;
+      } catch (error) {
+        console.error('Lỗi khi import dữ liệu:', error);
+        throw error;
+      }
+    },
+
+    async exportHistoryData() {
+      var params = {
+        input_batch_id: this.input_batch._id,
+        project_id: this.project._id,
+        block: this.cellSelected.block,
+        replicate: this.cellSelected.replicate,
+        column: this.cellSelected.column,
+      };
+      const res = await projectDetailApi.exportHistory(params);
     },
   },
 });

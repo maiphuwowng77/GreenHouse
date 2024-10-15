@@ -3,11 +3,6 @@
     <div class="content">
       <div v-if="loading">Loading...</div>
       <div v-else-if="dataRead.length > 0 && descriptionData.length > 0 && anovaData.length > 0 && tukeyResults.length > 0 && tTestResults.length > 0">
-        <div class="read">
-          <h3>Data Read</h3>
-          <dx-data-grid :data-source="dataRead" :show-borders="true">
-          </dx-data-grid>
-        </div>
         <div class="describe">
           <h3>Data Description</h3>
           <dx-data-grid :data-source="descriptionData" :show-borders="true">
